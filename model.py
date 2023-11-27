@@ -1,13 +1,15 @@
 import pandas as pd
-from mlxtend.frequent_patterns import apriori
-from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
 
-dataset = pd.read_csv('datasets/playlist-sample-ds1.csv')
+df = pd.read_csv('datasets/2023_spotify_ds1.csv')
 
-te = TransactionEncoder()
-te_ary = te.fit(dataset).transform(dataset)
-df = pd.DataFrame(te_ary, columns=te.columns_)
-frequent_items = apriori(df, min_support=0.6)
+# Dataset cleanup
+df['song'] = list(zip(df.artist_name, df.track_name))
+df = df.groupby(['pid', 'song'])['duration_ms'].sum().unstack().reset_index().fillna(0).set_index('pid')
+df = df.applymap(lambda x: True if x > 0 else False)
 
-with open("model-results.json", mode="w") as f:
-    f.write(frequent_items.to_json())
+frequent_itemsets = apriori(df, min_support=0.06, use_colnames=True)
+rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1)
+
+with open("model-results.json", mode="w") as file:
+    file.write(rules.to_json())
