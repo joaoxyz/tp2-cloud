@@ -19,10 +19,11 @@ with open('model_results.pickle', 'rb') as file:
     recommender = pickle.load(file)
 
 @app.post("/api/recommend")
-def generate_recommendation(inp : ModelInput) -> Recommendation:
+async def generate_recommendation(inp : ModelInput) -> Recommendation:
     result = []
     for song in inp.songs:
-        mask = [True if song in i else False for i in recommender['antecedents']]
-        result += recommender[mask].explode('consequents')['consequents'].unique()
+        step1 = recommender[[True if song in i else False for i in recommender['antecedents']]]
+        step2 = step1.explode('consequents')
+        result += step2['consequents'].unique().tolist()
     result = list(set(result))
     return Recommendation(playlist_ids=result, version='1', model_date=date.today().isoformat())
