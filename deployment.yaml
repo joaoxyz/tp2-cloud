@@ -1,0 +1,21 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: playlist-recommender-deployment
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: playlist-recommender
+  template:
+    metadata:
+      labels:
+        app: playlist-recommender
+    spec:
+      containers:
+      - name: apiserver
+        image: hub.docker.com/joaoxyz/apiserver:latest
+        ports:
+        - containerPort: 80
+      - name: recommendation-model
+        image: hub.docker.com/joaoxyz/recommendation-model:latest

@@ -1,5 +1,4 @@
 import pickle
-import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
@@ -7,7 +6,7 @@ from datetime import date
 
 class Recommendation(BaseModel):
     playlist_ids: List[str]
-    version: str
+    version: int
     model_date: str
 
 class ModelInput(BaseModel):
@@ -15,7 +14,7 @@ class ModelInput(BaseModel):
 
 app = FastAPI()
 
-with open('model_results.pickle', 'rb') as file:
+with open('/home/joaomiranda/project2-pv/model_results.pickle', 'rb') as file:
     recommender = pickle.load(file)
 
 @app.post("/api/recommend")
@@ -26,4 +25,4 @@ async def generate_recommendation(inp : ModelInput) -> Recommendation:
         step2 = step1.explode('consequents')
         result += step2['consequents'].unique().tolist()
     result = list(set(result))
-    return Recommendation(playlist_ids=result, version='1', model_date=date.today().isoformat())
+    return Recommendation(playlist_ids=result, version=1, model_date=date.today().isoformat())

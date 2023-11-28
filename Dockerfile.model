@@ -1,0 +1,7 @@
+# Base image
+FROM python:3.11.6-slim-bullseye
+WORKDIR /app
+COPY requirements.txt /app/requirements.txt
+COPY model.py /app/model.py
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+CMD ["python", "model.py"]
